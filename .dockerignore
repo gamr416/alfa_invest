@@ -1,0 +1,10 @@
+.git
+.venv
+.cursor
+node_modules
+web/dist
+web/node_modules
+__pycache__
+*.pyc
+.env
+cursor-agent-skills-20260527.zip

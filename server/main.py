@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from ollama_client import chat as ollama_chat
@@ -211,3 +214,20 @@ def academy():
             },
         ]
     }
+
+
+_DIST = Path(__file__).resolve().parent.parent / "web" / "dist"
+
+
+@app.get("/{full_path:path}")
+def spa(full_path: str):
+    if not _DIST.is_dir():
+        raise HTTPException(404, "ui not built")
+    if full_path:
+        target = (_DIST / full_path).resolve()
+        if _DIST in target.parents and target.is_file():
+            return FileResponse(target)
+    index = _DIST / "index.html"
+    if not index.is_file():
+        raise HTTPException(404, "ui not built")
+    return FileResponse(index)
