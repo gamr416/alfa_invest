@@ -1,0 +1,84 @@
+import { useEffect, useState } from 'react'
+import { Link, useLocation, useParams } from 'react-router-dom'
+import { api } from '../api'
+import { EmptyState } from '../components/EmptyState'
+import { Mascot } from '../components/Mascot'
+
+type Post = { id: string; author: string; title: string; body: string; tag: string }
+
+export function PulsePage() {
+  const [items, setItems] = useState<Post[]>([])
+  const [tag, setTag] = useState('все')
+
+  useEffect(() => {
+    api.pulse().then((r) => setItems(r.items))
+  }, [])
+
+  const tags = ['все', ...Array.from(new Set(items.map((i) => i.tag)))]
+  const shown = tag === 'все' ? items : items.filter((i) => i.tag === tag)
+
+  return (
+    <div className="page">
+      <h1 className="page-title">Пульс</h1>
+      <p className="page-sub">{items.length} материалов · без торговых сигналов</p>
+      <Mascot pose="hello" size={92} text="Это лента обучения. Не призыв покупать." />
+      <div className="chip-row">
+        {tags.map((t) => (
+          <button key={t} className={`chip${tag === t ? ' active' : ''}`} onClick={() => setTag(t)}>
+            {t}
+          </button>
+        ))}
+      </div>
+      {shown.length === 0 ? (
+        <EmptyState text="В этой ленте пока тихо. Загляни позже или смени фильтр." />
+      ) : (
+        shown.map((p) => (
+        <Link key={p.id} to={`/pulse/${p.id}`} state={p} className="feed-card">
+          <div className="stripe" />
+          <div className="body">
+            <div
+              className="muted"
+              style={{
+                marginBottom: 6,
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                fontSize: 11,
+                fontWeight: 600,
+              }}
+            >
+              {p.author} · {p.tag}
+            </div>
+            <div style={{ fontWeight: 700, marginBottom: 6, letterSpacing: '-0.02em' }}>{p.title}</div>
+            <div style={{ fontSize: 14, color: 'var(--muted)' }}>{p.body}</div>
+          </div>
+        </Link>
+        ))
+      )}
+    </div>
+  )
+}
+
+export function PulsePostPage() {
+  const { id } = useParams()
+  const loc = useLocation()
+  const st = loc.state as Post | null
+  const [post, setPost] = useState<Post | null>(st?.title ? st : null)
+
+  useEffect(() => {
+    if (post) return
+    api.pulse().then((r) => setPost(r.items.find((i) => i.id === id) || r.items[0] || null))
+  }, [id, post])
+
+  if (!post) return <div className="page muted">Загрузка…</div>
+  return (
+    <div className="page">
+      <h1 className="page-title" style={{ fontSize: 22 }}>
+        {post.title}
+      </h1>
+      <p style={{ fontSize: 16, lineHeight: 1.55 }}>{post.body}</p>
+      <Link className="btn btn-ghost" style={{ marginTop: 12 }} to="/learn">
+        К урокам
+      </Link>
+    </div>
+  )
+}

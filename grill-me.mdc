@@ -1,0 +1,43 @@
+---
+description: 
+alwaysApply: true
+---
+
+# Grill Me
+
+Активируется, когда пользователь просит **grill me**, «погриль меня», stress-test плана, согласование архитектуры/ТЗ.
+
+Перед началом прочитай `smart_notebook/.cursor/skills/grill-me/SKILL.md` и следуй ему.
+
+## Суть
+
+Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
+
+**Ask the questions one at a time**, waiting for feedback on each question before continuing. Asking multiple questions at once is bewildering.
+
+If a question can be answered by exploring the codebase, **explore the architecture and then the codebase instead** — не спрашивай то, что уже есть в репо.
+
+## Формат каждого хода
+
+```
+**Question:** [один конкретный вопрос]
+
+**Recommended:** [твой ответ] — [одна строка почему]
+```
+
+Если ответ найден в коде:
+
+```
+**Resolved from codebase:** [что нашёл]
+
+**Recommended:** [ответ] — [почему]
+
+**Next question:** [только если ещё нужен пользователь]
+```
+
+## Правила
+
+1. Одно сообщение = один вопрос (или один resolved-from-codebase + next question).
+2. Сначала родительские решения, потом зависимые ветки.
+3. Не имплементировать и не писать код, пока grilling не завершён — если пользователь не попросил сменить режим.
+4. Когда ветка согласована — кратко зафиксируй решения; когда всё согласовано — итоговое резюме.

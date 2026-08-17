@@ -1,0 +1,8 @@
+---
+description: Архитектура кейса Альфа-будущее живёт в architecture/*.md
+alwaysApply: true
+---
+
+Читай и правь архитектуру только в папке `architecture/` (Markdown). Точка входа: `architecture/README.md`.
+
+ЦА пока: **18–24** без счёта или с пустым счётом. См. `docs/adr/0001-working-cohort-18-24.md`.

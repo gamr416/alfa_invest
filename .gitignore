@@ -1,0 +1,10 @@
+.venv/
+node_modules/
+web/dist/
+__pycache__/
+*.pyc
+.DS_Store
+.env
+cursor-agent-skills-20260527.zip
+.cursor/
+
