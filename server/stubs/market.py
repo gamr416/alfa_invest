@@ -335,5 +335,4 @@ def recent_news(limit: int = 5, ts: float | None = None) -> list[dict]:
 COLLECTIONS = [
     {"id": "first", "title": "Первый шаг", "kind": "conservative"},
     {"id": "up", "title": "Взлёты дня", "kind": "stock"},
-    {"id": "pop", "title": "Популярно", "kind": "all"},
 ]
