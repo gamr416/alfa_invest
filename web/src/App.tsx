@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import { api } from './api'
 import { PhoneShell } from './components/PhoneShell'
 import { AcademyPage, LessonPage } from './pages/Academy'
+import { CompoundPage } from './pages/Compound'
 import { BuyPage } from './pages/Buy'
 import { CatalogPage } from './pages/Catalog'
 import { InstrumentPage } from './pages/Instrument'
@@ -32,6 +33,7 @@ function ShellRoutes() {
         <Route path="/pulse" element={<PulsePage />} />
         <Route path="/pulse/:id" element={<PulsePostPage />} />
         <Route path="/learn" element={<AcademyPage />} />
+        <Route path="/learn/compound" element={<CompoundPage />} />
         <Route path="/learn/:id" element={<LessonPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/agent" element={<AgentPage />} />
@@ -43,22 +45,38 @@ function ShellRoutes() {
   )
 }
 
+function AgeBlocked() {
+  return (
+    <div className="app-stage">
+      <div className="phone-shell">
+        <div className="page">
+          <h1 className="page-title">Пока нельзя</h1>
+          <p className="page-sub">Демо для 18+. Младше 18 сюда не пускаем.</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function Gate() {
   const [ready, setReady] = useState(false)
   const [needOnboard, setNeedOnboard] = useState(true)
+  const [blocked, setBlocked] = useState(false)
 
   useEffect(() => {
     const local = localStorage.getItem('alfa-onboarded') === '1'
-    api
-      .portfolio()
-      .then((p) => {
-        setNeedOnboard(!(p.onboarded || local))
+    Promise.all([
+      api.me().catch(() => null),
+      api.portfolio().catch(() => null),
+    ]).then(([me, p]) => {
+      if (me && me.age < 18) {
+        setBlocked(true)
         setReady(true)
-      })
-      .catch(() => {
-        setNeedOnboard(!local)
-        setReady(true)
-      })
+        return
+      }
+      setNeedOnboard(!(p?.onboarded || local))
+      setReady(true)
+    })
   }, [])
 
   if (!ready) {
@@ -68,6 +86,8 @@ function Gate() {
       </div>
     )
   }
+
+  if (blocked) return <AgeBlocked />
 
   return (
     <Routes>

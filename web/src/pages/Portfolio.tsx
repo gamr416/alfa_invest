@@ -10,14 +10,19 @@ export function PortfolioPage() {
   const [err, setErr] = useState('')
 
   useEffect(() => {
-    api
-      .portfolio()
-      .then(setData)
-      .catch((e) => setErr(e.message))
-    api.instruments().then((r) => {
-      const sorted = [...r.items].sort((a, b) => Math.abs(b.change_pct) - Math.abs(a.change_pct))
-      setMovers(sorted.slice(0, 6))
-    })
+    const load = () => {
+      api
+        .portfolio()
+        .then(setData)
+        .catch((e) => setErr(e.message))
+      api.instruments().then((r) => {
+        const sorted = [...r.items].sort((a, b) => Math.abs(b.change_pct) - Math.abs(a.change_pct))
+        setMovers(sorted.slice(0, 6))
+      })
+    }
+    load()
+    const id = setInterval(load, 60_000)
+    return () => clearInterval(id)
   }, [])
 
   if (err)

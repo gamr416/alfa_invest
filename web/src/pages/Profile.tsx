@@ -19,7 +19,7 @@ export function ProfilePage() {
   return (
     <div className="page">
       <h1 className="page-title">{me.name}</h1>
-      <p className="page-sub">{me.age} лет · когорта 18–24</p>
+      <p className="page-sub">{me.age} лет · когорта 18–26</p>
       <div className="section-label">Счёт и карта</div>
       <div className="card">
         <div className="stat-row row-between">

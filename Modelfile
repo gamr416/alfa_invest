@@ -1,0 +1,16 @@
+FROM /home/user/.cache/huggingface/hub/models--prism-ml--Bonsai-8B-gguf/snapshots/48516770dd04643643e9f9019a2a349cf26c5dbd/Bonsai-8B.gguf
+PARAMETER temperature 0.3
+PARAMETER num_ctx 1024
+PARAMETER num_predict 96
+# Qwen-style chat; empty <think> so Bonsai skips chain-of-thought (иначе «Думаю…» на минуты).
+TEMPLATE """{{- if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{- range .Messages }}{{- if eq .Role "user" }}<|im_start|>user
+{{ .Content }}<|im_end|>
+{{ else if eq .Role "assistant" }}<|im_start|>assistant
+{{ .Content }}<|im_end|>
+{{ end }}{{- end }}<|im_start|>assistant
+<think>
+
+</think>
+"""

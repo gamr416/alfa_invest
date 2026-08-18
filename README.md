@@ -1,6 +1,6 @@
 # Альфа-инвестиции MVP
 
-Mobile-first веб-оболочка инвестиций для кейса «Альфа-будущее». ЦА **18–24**.
+Mobile-first веб-оболочка инвестиций для кейса «Альфа-будущее». ЦА **18–26**.
 
 **Полная документация:** [docs/mvp.md](docs/mvp.md)  
 Кейс: [docs/project.md](docs/project.md) · архитектура: [architecture/README.md](architecture/README.md)
@@ -18,7 +18,11 @@ cd alfa_invest/web && npm run dev
 
 http://127.0.0.1:5173 — Vite проксирует `/api` на :8000.
 
-Ollama: модель `bonsai-27b:latest`, `ollama serve`.
+Ollama: модель `bonsai-8b:latest` (локальный GGUF), `ollama serve`.
+
+```bash
+ollama create bonsai-8b -f Modelfile
+```
 
 Fallback без модели:
 

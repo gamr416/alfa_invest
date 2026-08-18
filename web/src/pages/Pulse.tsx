@@ -1,17 +1,23 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import { api } from '../api'
+import { api, type PulsePost } from '../api'
 import { EmptyState } from '../components/EmptyState'
 import { Mascot } from '../components/Mascot'
 
-type Post = { id: string; author: string; title: string; body: string; tag: string }
-
 export function PulsePage() {
-  const [items, setItems] = useState<Post[]>([])
+  const [items, setItems] = useState<PulsePost[]>([])
   const [tag, setTag] = useState('все')
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    api.pulse().then((r) => setItems(r.items))
+    const load = () =>
+      api.pulse().then((r) => {
+        setItems(r.items)
+        setReady(true)
+      })
+    load()
+    const id = setInterval(load, 60_000)
+    return () => clearInterval(id)
   }, [])
 
   const tags = ['все', ...Array.from(new Set(items.map((i) => i.tag)))]
@@ -29,7 +35,9 @@ export function PulsePage() {
           </button>
         ))}
       </div>
-      {shown.length === 0 ? (
+      {!ready ? (
+        <p className="muted">Загрузка…</p>
+      ) : shown.length === 0 ? (
         <EmptyState text="В этой ленте пока тихо. Загляни позже или смени фильтр." />
       ) : (
         shown.map((p) => (
@@ -61,8 +69,8 @@ export function PulsePage() {
 export function PulsePostPage() {
   const { id } = useParams()
   const loc = useLocation()
-  const st = loc.state as Post | null
-  const [post, setPost] = useState<Post | null>(st?.title ? st : null)
+  const st = loc.state as PulsePost | null
+  const [post, setPost] = useState<PulsePost | null>(st?.title ? st : null)
 
   useEffect(() => {
     if (post) return

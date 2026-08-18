@@ -25,8 +25,8 @@ export function AcademyPage() {
   return (
     <div className="page">
       <h1 className="page-title">Учёба</h1>
-      <p className="page-sub">Микроуроки без давления</p>
-      <Mascot pose="hello" size={110} text="2–3 минуты — и уже понятнее, зачем риск и горизонт." />
+      <p className="page-sub">Микроуроки: практика, не азбука</p>
+      <Mascot pose="hello" size={110} text="Знаешь про риск. Дальше — как сделать первый взнос, когда доход скачет." />
       <div className="card">
         <div className="row-between">
           <span>Прогресс курса</span>
@@ -46,6 +46,10 @@ export function AcademyPage() {
         <Link className="tile" to="/pulse">
           <span className="muted">Почитать</span>
           <strong>Пульс</strong>
+        </Link>
+        <Link className="tile" to="/learn/compound">
+          <span className="muted">Считать</span>
+          <strong>Процент</strong>
         </Link>
       </div>
       <div className="section-label">Уроки</div>

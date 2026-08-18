@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { NewsBell } from './NewsBell'
 import { TabBar } from './TabBar'
 
 function parentOf(path: string): string | null {
@@ -35,6 +36,7 @@ export function PhoneShell({ children, tabs = true }: { children: ReactNode; tab
             </button>
           ) : null}
           <span className="brand-title">АЛЬФА ИНВЕСТИЦИИ</span>
+          <NewsBell />
         </header>
         <div className={`phone-body${tabs ? '' : ' no-tabs'}${isChat ? ' chat-mode' : ''}`}>{children}</div>
         {tabs ? <TabBar /> : null}

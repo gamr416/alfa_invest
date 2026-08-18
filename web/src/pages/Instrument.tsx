@@ -1,20 +1,30 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { api, money, pct, type Instrument } from '../api'
+import { api, money, pct, type Instrument, type PulsePost } from '../api'
 import { PriceChart } from '../components/PriceChart'
 
 export function InstrumentPage() {
   const { ticker = '' } = useParams()
   const [inst, setInst] = useState<Instrument | null>(null)
+  const [news, setNews] = useState<PulsePost | null>(null)
   const [tab, setTab] = useState<'chart' | 'book' | 'metrics'>('chart')
   const [range, setRange] = useState<'7' | '14' | '24'>('14')
   const [err, setErr] = useState('')
 
   useEffect(() => {
-    api
-      .instrument(ticker)
-      .then(setInst)
-      .catch((e) => setErr(e.message))
+    const load = () => {
+      api
+        .instrument(ticker)
+        .then(setInst)
+        .catch((e) => setErr(e.message))
+      api.pulse().then((r) => {
+        const hit = r.items.find((p) => p.tickers?.some((t) => t.toUpperCase() === ticker.toUpperCase()))
+        setNews(hit || null)
+      })
+    }
+    load()
+    const id = setInterval(load, 60_000)
+    return () => clearInterval(id)
   }, [ticker])
 
   if (err)
@@ -42,6 +52,11 @@ export function InstrumentPage() {
         {money(inst.price, inst.price < 1 ? 4 : 2)}
       </p>
       <p className={inst.change_pct >= 0 ? 'pnl-up muted' : 'pnl-down muted'}>{pct(inst.change_pct)} за день</p>
+      {news ? (
+        <Link to={`/pulse/${news.id}`} state={news} className="muted" style={{ display: 'block', marginTop: 8, fontSize: 13 }}>
+          {news.title}
+        </Link>
+      ) : null}
       <p style={{ margin: '12px 0', fontSize: 14 }}>{inst.desc}</p>
 
       <div className="seg">
@@ -61,13 +76,13 @@ export function InstrumentPage() {
           <div className="chart-range">
             {(['7', '14', '24'] as const).map((n) => (
               <button key={n} className={range === n ? 'active' : ''} onClick={() => setRange(n)}>
-                {n === '24' ? '24 дня' : `${n} дней`}
+                {n === '24' ? '24 мин' : `${n} мин`}
               </button>
             ))}
           </div>
           <PriceChart candles={(inst.candles || []).slice(-Number(range))} height={240} />
           <p className="chart-caption">
-            Свечи по дням. Зелёная — день закрылся выше открытия, красная — ниже. Фитиль — максимум и минимум за день.
+            Свечи по минутам. Зелёная — минута закрылась выше открытия, красная — ниже. Фитиль — максимум и минимум.
           </p>
         </div>
       )}

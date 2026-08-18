@@ -1,9 +1,10 @@
-type Pose = 'hello' | 'buy' | 'type'
+type Pose = 'hello' | 'buy' | 'type' | 'cry'
 
 const SRC: Record<Pose, string> = {
   hello: '/mascot/alfa-hello.png',
   buy: '/mascot/alfa-buy.png',
   type: '/mascot/alfa-sit-in-front-of-computer.png',
+  cry: '/mascot/alfa-crying.png',
 }
 
 export function Mascot({

@@ -5,6 +5,7 @@ import { PhoneShell } from '../components/PhoneShell'
 
 const GOALS = [
   { id: 'pillow', title: 'Подушка', sub: 'На чёрный день, спокойно' },
+  { id: 'inflate', title: 'Инфляция', sub: 'Чтобы кэш на карте не таял' },
   { id: 'gadget', title: 'Гаджет', sub: 'Телефон или ноут через год' },
   { id: 'trip', title: 'Поездка', sub: 'Отложить на отпуск' },
 ]
@@ -97,7 +98,7 @@ export function Onboarding() {
               pose="hello"
               size={148}
               stack
-              text={`Привет, ${name}. Первый шаг в инвестиции — без страха и без обещаний заработка.`}
+              text={`Привет, ${name}. Акции и риск ты уже знаешь. Не хватает первого шага — без страха и без обещаний заработка.`}
             />
             <p className="muted" style={{ marginBottom: 16 }}>
               На карте кэшбэк {money(cashback, 0)}. Хватит, чтобы начать от 100 ₽.
@@ -110,7 +111,7 @@ export function Onboarding() {
 
         {step === 1 && (
           <>
-            <Mascot pose="type" size={108} text="Зачем тебе это? Цель помогает выбрать риск, а не «что модно»." />
+            <Mascot pose="type" size={108} text="Зачем деньги? При дырявом доходе цель важнее витрины акций." />
             <div className="goal-grid">
               {GOALS.map((g) => (
                 <button
@@ -132,6 +133,7 @@ export function Onboarding() {
         {step === 2 && (
           <>
             <Mascot pose="type" size={96} text="Три коротких вопроса — про горизонт, не про IQ." />
+            <p className="muted">Учебные вопросы, не официальный тест Банка России.</p>
             {QUIZ.map((item, qi) => (
               <div key={item.q} className="card" style={{ marginTop: 10 }}>
                 <div style={{ fontWeight: 600, marginBottom: 10, fontSize: 15 }}>{item.q}</div>

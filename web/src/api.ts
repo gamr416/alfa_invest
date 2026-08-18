@@ -31,6 +31,15 @@ export type Portfolio = {
   goal: string | null
 }
 
+export type PulsePost = {
+  id: string
+  author: string
+  title: string
+  body: string
+  tag: string
+  tickers?: string[]
+}
+
 export type Instrument = {
   ticker: string
   name: string
@@ -80,8 +89,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
-  pulse: () =>
-    req<{ items: { id: string; author: string; title: string; body: string; tag: string }[] }>('/api/pulse'),
+  pulse: () => req<{ items: PulsePost[] }>('/api/pulse'),
   academy: () =>
     req<{ lessons: { id: string; title: string; minutes: number; done: boolean; text: string }[] }>(
       '/api/academy',
