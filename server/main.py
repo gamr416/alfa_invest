@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
+from academy_curriculum import payload as academy_payload
 from ollama_client import chat as ollama_chat
 from ollama_client import health as ollama_health
 from stubs import alfa, market, portfolio
@@ -170,59 +171,7 @@ def pulse():
 
 @app.get("/api/academy")
 def academy():
-    return {
-        "lessons": [
-            {
-                "id": "risk",
-                "title": "Страх первого взноса",
-                "minutes": 2,
-                "done": False,
-                "text": "Ты уже знаешь, что цена может уйти вниз. Страх — из-за отсутствия практики, не из-за «непонятных слов». Первый шаг — маленькая сумма в спокойный фонд, не ставка на одну акцию.",
-            },
-            {
-                "id": "horizon",
-                "title": "Горизонт и дырявый доход",
-                "minutes": 2,
-                "done": False,
-                "text": "Стипендия и первая зарплата скачут. Деньги, которые могут понадобиться через месяц, не кладут в акции. Фонд денежного рынка — чтобы потренировать счёт, не «обыграть рынок».",
-            },
-            {
-                "id": "diversify",
-                "title": "Не всё в одну бумагу",
-                "minutes": 3,
-                "done": False,
-                "text": "Акцию как идею ты знаешь. Практика: одна компания — одна ставка. Фонд уже корзина. Для первого взноса этого достаточно.",
-            },
-            {
-                "id": "habit",
-                "title": "Привычка по чуть-чуть",
-                "minutes": 2,
-                "done": False,
-                "text": "Регулярный маленький взнос лучше редкого «всё сразу» из страха упустить.",
-            },
-            {
-                "id": "compound",
-                "title": "Сложный процент",
-                "minutes": 2,
-                "done": False,
-                "text": "Сложный процент — это процент на уже накопленный процент. Калькулятор в Учёбе считает модель: если ставка не меняется. Это не прогноз и не обещание дохода — цена фонда может и падать.",
-            },
-            {
-                "id": "commission",
-                "title": "Откуда комиссия",
-                "minutes": 2,
-                "done": False,
-                "text": "Брокер берёт маленький процент со сделки. В демо это видно до подтверждения — без сюрприза.",
-            },
-            {
-                "id": "nofomo",
-                "title": "Не гнаться за взлётами дня",
-                "minutes": 2,
-                "done": False,
-                "text": "«Взлёты дня» — витрина, не совет. Для первого шага скучный фонд обычно честнее.",
-            },
-        ]
-    }
+    return academy_payload()
 
 
 _DIST = Path(__file__).resolve().parent.parent / "web" / "dist"

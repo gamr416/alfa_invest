@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { money } from '../api'
+import { LOCAL_ACADEMY, isUnlocked, markDone, readDone } from '../academyProgress'
 import { Mascot } from '../components/Mascot'
 
 const YEARS = [1, 3, 5, 10]
@@ -27,6 +28,10 @@ export function CompoundPage() {
   const [monthly, setMonthly] = useState('500')
   const [years, setYears] = useState(5)
   const [rate, setRate] = useState(12)
+  const done = readDone()
+  const compoundNode = LOCAL_ACADEMY.nodes.find((n) => n.id === 'compound')
+  const blocked =
+    !!compoundNode && !isUnlocked(compoundNode, done) && !done.compound
 
   const principal = Math.max(0, Number(start.replace(',', '.')) || 0)
   const pmt = Math.max(0, Number(monthly.replace(',', '.')) || 0)
@@ -34,6 +39,8 @@ export function CompoundPage() {
   const fv = useMemo(() => futureValue(principal, pmt, rate, years), [principal, pmt, rate, years])
   const rows = useMemo(() => yearEnds(principal, pmt, rate, years), [principal, pmt, rate, years])
   const grown = fv - contributed
+
+  if (blocked) return <Navigate to="/learn" replace />
 
   return (
     <div className="page">
@@ -94,7 +101,10 @@ export function CompoundPage() {
       <p className="muted" style={{ fontSize: 13, marginTop: 14 }}>
         Ставка выдумана для учёбы. Цена фонда может и падать. Это не гарантия дохода.
       </p>
-      <Link className="btn btn-primary" to="/instrument/LQDT">
+      <Link className="btn btn-primary" to="/learn" onClick={() => markDone('compound')}>
+        Понятно
+      </Link>
+      <Link className="btn btn-ghost" style={{ marginTop: 8 }} to="/instrument/LQDT">
         К спокойному фонду
       </Link>
     </div>

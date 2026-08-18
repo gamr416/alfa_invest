@@ -22,7 +22,7 @@ export function PhoneShell({ children, tabs = true }: { children: ReactNode; tab
 
   return (
     <div className="app-stage">
-      <div className="phone">
+        <div className="phone" id="phone-frame">
         <div className="phone-status">
           <span>{now}</span>
           <span>демо</span>

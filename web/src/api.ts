@@ -91,9 +91,11 @@ export const api = {
     }),
   pulse: () => req<{ items: PulsePost[] }>('/api/pulse'),
   academy: () =>
-    req<{ lessons: { id: string; title: string; minutes: number; done: boolean; text: string }[] }>(
-      '/api/academy',
-    ),
+    req<{
+      lessons: { id: string; title: string; minutes: number; done: boolean; text: string }[]
+      nodes: import('./academyProgress').AcademyNode[]
+      glossary: import('./academyProgress').Glossary
+    }>('/api/academy'),
   chat: (messages: { role: string; content: string }[], context?: string) =>
     req<{ ok: boolean; reply: string; error?: string }>('/api/agent/chat', {
       method: 'POST',
