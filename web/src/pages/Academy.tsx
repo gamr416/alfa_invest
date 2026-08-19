@@ -1,6 +1,8 @@
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, Navigate, useParams } from 'react-router-dom'
+import { api, type League } from '../api'
+import { LeaguePeek } from '../components/LeagueTable'
 import {
   LOCAL_ACADEMY,
   type Glossary,
@@ -9,6 +11,7 @@ import {
   markDone,
   pathRows,
   readDone,
+  syncProgress,
   syncStreakOnVisit,
 } from '../academyProgress'
 
@@ -16,6 +19,22 @@ export function AcademyPage() {
   const nodes = LOCAL_ACADEMY.nodes
   const done = readDone()
   const streak = syncStreakOnVisit()
+  const [league, setLeague] = useState<League | null>(null)
+
+  useEffect(() => {
+    let alive = true
+    syncProgress()
+      .then(() => api.league())
+      .then((data) => {
+        if (alive) setLeague(data)
+      })
+      .catch(() => {
+        if (alive) setLeague(null)
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   const rows = useMemo(() => pathRows(nodes), [nodes])
   const open = nodes.filter((n) => !n.locked)
@@ -36,6 +55,7 @@ export function AcademyPage() {
         Сначала предыдущий урок. На развилке хватит одной ветки.
         {open.length ? ` ${finished}/${open.length}` : ''}
       </p>
+      <LeaguePeek data={league} />
       <div className="path">
         {rows.map((row, ri) => (
           <Fragment key={ri}>

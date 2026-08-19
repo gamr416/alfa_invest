@@ -7,6 +7,7 @@ import { CompoundPage } from './pages/Compound'
 import { BuyPage } from './pages/Buy'
 import { CatalogPage } from './pages/Catalog'
 import { InstrumentPage } from './pages/Instrument'
+import { LeaguePage } from './pages/League'
 import { Onboarding } from './pages/Onboarding'
 import { AnalyticsPage, OperationsPage } from './pages/Operations'
 import { PortfolioPage } from './pages/Portfolio'
@@ -33,6 +34,7 @@ function ShellRoutes() {
         <Route path="/pulse" element={<PulsePage />} />
         <Route path="/pulse/:id" element={<PulsePostPage />} />
         <Route path="/learn" element={<AcademyPage />} />
+        <Route path="/learn/league" element={<LeaguePage />} />
         <Route path="/learn/compound" element={<CompoundPage />} />
         <Route path="/learn/:id" element={<LessonPage />} />
         <Route path="/profile" element={<ProfilePage />} />
@@ -64,6 +66,7 @@ function AgeBlocked() {
 }
 
 function Gate() {
+  const loc = useLocation()
   const [ready, setReady] = useState(false)
   const [needOnboard, setNeedOnboard] = useState(true)
   const [blocked, setBlocked] = useState(false)
@@ -97,7 +100,10 @@ function Gate() {
   return (
     <Routes>
       <Route path="/onboarding" element={<Onboarding />} />
-      <Route path="/*" element={needOnboard ? <Navigate to="/onboarding" replace /> : <ShellRoutes />} />
+      <Route
+        path="/*"
+        element={needOnboard ? <Navigate to={`/onboarding${loc.search}`} replace /> : <ShellRoutes />}
+      />
     </Routes>
   )
 }

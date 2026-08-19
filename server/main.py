@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
@@ -12,7 +13,8 @@ from pydantic import BaseModel, Field
 from academy_curriculum import payload as academy_payload
 from ollama_client import chat as ollama_chat
 from ollama_client import health as ollama_health
-from stubs import alfa, market, portfolio
+from stubs import alfa, league, market, portfolio, referral
+from stubs.identity import resolve as resolve_user
 
 app = FastAPI(title="Alfa Invest MVP")
 app.add_middleware(
@@ -43,6 +45,21 @@ class ChatMessage(BaseModel):
 class ChatIn(BaseModel):
     messages: list[ChatMessage] = Field(min_length=1, max_length=128)
     context: str | None = Field(default=None, max_length=4000)
+
+
+class ClaimIn(BaseModel):
+    code: str = Field(min_length=1, max_length=16)
+
+
+class AcademyProgressIn(BaseModel):
+    done: list[str] = Field(default_factory=list)
+    streak: int = Field(default=0, ge=0, le=365)
+
+
+def current_user_id(
+    x_demo_user: Annotated[str | None, Header()] = None,
+) -> str:
+    return resolve_user(x_demo_user)
 
 
 @app.get("/api/health")
@@ -172,6 +189,29 @@ def pulse():
 @app.get("/api/academy")
 def academy():
     return academy_payload()
+
+
+@app.get("/api/referral")
+def get_referral(user_id: str = Depends(current_user_id)):
+    return referral.snapshot(user_id)
+
+
+@app.post("/api/referral/claim")
+def claim_referral(body: ClaimIn, user_id: str = Depends(current_user_id)):
+    try:
+        return referral.claim(body.code, user_id)
+    except ValueError as e:
+        raise HTTPException(400, str(e)) from e
+
+
+@app.get("/api/league")
+def get_league(user_id: str = Depends(current_user_id)):
+    return league.table(user_id)
+
+
+@app.post("/api/academy/progress")
+def post_academy_progress(body: AcademyProgressIn, user_id: str = Depends(current_user_id)):
+    return league.save_progress(user_id, body.done, body.streak)
 
 
 _DIST = Path(__file__).resolve().parent.parent / "web" / "dist"

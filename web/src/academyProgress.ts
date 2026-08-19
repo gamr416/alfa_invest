@@ -1,4 +1,5 @@
 import data from './academy.json'
+import { api } from './api'
 
 export type Quiz = {
   q: string
@@ -38,6 +39,14 @@ export function markDone(id: string) {
   prev[id] = true
   localStorage.setItem(DONE_KEY, JSON.stringify(prev))
   bumpStreak()
+  void syncProgress()
+}
+
+export function syncProgress() {
+  const map = readDone()
+  const done = Object.keys(map).filter((id) => map[id])
+  const streak = readStreak()
+  return api.academyProgress({ done, streak: streak.count }).catch(() => null)
 }
 
 function pad(n: number) {

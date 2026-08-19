@@ -135,3 +135,15 @@ def place_order(
         }
     )
     return {"order": order, "portfolio": snapshot()}
+
+
+def conservative_practice() -> dict[str, bool]:
+    """First and repeat paper buys into conservative instruments (not PnL)."""
+    buys = 0
+    for order in _state["orders"]:
+        if order.get("side") != "buy":
+            continue
+        inst = market.get_instrument(order["ticker"])
+        if inst and inst.get("conservative"):
+            buys += 1
+    return {"first": buys >= 1, "repeat": buys >= 2}

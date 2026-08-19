@@ -15,9 +15,14 @@
 - `web/` — UI (Vite React)
 - `server/` — FastAPI
   - `stubs/alfa.py` — профиль клиента
+  - `stubs/identity.py` — демо `user_id` из `X-Demo-User`, иначе Аня
   - `stubs/market.py` — рынок
   - `stubs/portfolio.py` — paper-портфель
+  - `stubs/referral.py` — share-only код, без награды
+  - `stubs/league.py` — лига практики (Аня + 3 сида), очки не из PnL
   - `ollama_client.py` — агент `bonsai-27b`
+
+Демо-сессия: uuid в `localStorage`, заголовок `X-Demo-User`. Реферал — ссылка `/onboarding?ref=`, счётчик приглашённых, самореферал запрещён, бонуса нет. Лига практики: отдельный экран `/learn/league` с учёбы и профиля, очки не из PnL. Postgres из [distributed.md](distributed.md) не поднимаем.
 
 ## Поток
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { api, money } from '../api'
 import { Mascot } from '../components/Mascot'
 import { PhoneShell } from '../components/PhoneShell'
@@ -26,6 +27,8 @@ const QUIZ = [
 ]
 
 export function Onboarding() {
+  const [params] = useSearchParams()
+  const refCode = (params.get('ref') || '').trim()
   const [step, setStep] = useState(0)
   const [goal, setGoal] = useState('pillow')
   const [answers, setAnswers] = useState<number[]>([])
@@ -43,6 +46,15 @@ export function Onboarding() {
       if (m.cashback >= 100) setAmount(String(Math.min(500, Math.round(m.cashback))))
     })
   }, [])
+
+  async function claimRef() {
+    if (!refCode) return
+    try {
+      await api.claimReferral(refCode)
+    } catch {
+      /* свой код или пустышка — онбординг не блокируем */
+    }
+  }
 
   async function loadWhy() {
     setLoading(true)
@@ -69,6 +81,7 @@ export function Onboarding() {
       await api.onboard(goal)
       const qty = Math.max(1, Math.floor(Number(amount) / 100.42))
       await api.order({ ticker: 'LQDT', side: 'buy', qty: Math.max(1, qty) })
+      await claimRef()
       localStorage.setItem('alfa-onboarded', '1')
       window.location.href = '/'
     } catch (e) {
@@ -79,6 +92,7 @@ export function Onboarding() {
 
   async function skip() {
     await api.onboard(goal)
+    await claimRef()
     localStorage.setItem('alfa-onboarded', '1')
     window.location.href = '/'
   }
@@ -100,6 +114,9 @@ export function Onboarding() {
               stack
               text={`Привет, ${name}. Акции и риск ты уже знаешь. Не хватает первого шага — без страха и без обещаний заработка.`}
             />
+            {refCode ? (
+              <p className="ref-note">Приглашение без награды. Тот же первый шаг, что у друга.</p>
+            ) : null}
             <p className="muted" style={{ marginBottom: 16 }}>
               На карте кэшбэк {money(cashback, 0)}. Хватит, чтобы начать от 100 ₽.
             </p>

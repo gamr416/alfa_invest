@@ -1,10 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { api, money, type Me } from '../api'
+import { api, money, type League, type Me, type Referral } from '../api'
+import { LeaguePeek } from '../components/LeagueTable'
 
 export function ProfilePage() {
   const [me, setMe] = useState<Me | null>(null)
   const [ollama, setOllama] = useState(false)
+  const [referral, setReferral] = useState<Referral | null | undefined>(undefined)
+  const [league, setLeague] = useState<League | null>(null)
+  const [copied, setCopied] = useState<'link' | 'code' | ''>('')
+  const [copyErr, setCopyErr] = useState('')
+  const copyTimer = useRef<number>(0)
 
   useEffect(() => {
     api.me().then(setMe)
@@ -12,7 +18,24 @@ export function ProfilePage() {
       .health()
       .then((h) => setOllama(!!h.ollama?.available))
       .catch(() => setOllama(false))
+    api.referral().then(setReferral).catch(() => setReferral(null))
+    api.league().then(setLeague).catch(() => setLeague(null))
+    return () => window.clearTimeout(copyTimer.current)
   }, [])
+
+  async function copy(kind: 'link' | 'code') {
+    if (!referral) return
+    const value = kind === 'link' ? `${window.location.origin}${referral.path}` : referral.code
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopyErr('')
+      setCopied(kind)
+      window.clearTimeout(copyTimer.current)
+      copyTimer.current = window.setTimeout(() => setCopied(''), 1600)
+    } catch {
+      setCopyErr('Не скопировалось. Выдели код вручную.')
+    }
+  }
 
   if (!me) return <div className="page muted">Загрузка…</div>
 
@@ -40,6 +63,37 @@ export function ProfilePage() {
           <strong>демо · paper</strong>
         </div>
       </div>
+
+      <div className="section-label">Пригласить</div>
+      <div className="card invite-card">
+        {referral === undefined ? (
+          <p className="muted">Загрузка…</p>
+        ) : referral ? (
+          <>
+            <p className="invite-lead">Ссылка без награды. Друг увидит тот же первый шаг.</p>
+            <div className="invite-code" aria-label="Код приглашения">
+              {referral.code}
+            </div>
+            <p className="muted invite-path">{referral.path}</p>
+            <p className="invite-count">
+              Приглашено: <strong>{referral.invited_count}</strong>
+            </p>
+            <div className="invite-actions">
+              <button type="button" className="btn btn-primary" onClick={() => copy('link')}>
+                {copied === 'link' ? 'Ссылка скопирована' : 'Скопировать ссылку'}
+              </button>
+              <button type="button" className="btn btn-ghost" onClick={() => copy('code')}>
+                {copied === 'code' ? 'Код скопирован' : 'Скопировать код'}
+              </button>
+            </div>
+            {copyErr ? <p className="muted">{copyErr}</p> : null}
+          </>
+        ) : (
+          <p className="muted">Код сейчас недоступен. Ссылку можно скопировать позже.</p>
+        )}
+      </div>
+
+      <LeaguePeek data={league} />
 
       <div className="tiles">
         <Link className="tile" to="/operations">

@@ -133,7 +133,7 @@ OLLAMA_URL=http://127.0.0.1:1 uvicorn main:app --host 127.0.0.1 --port 8000
 - `/operations` — лента сделок.
 - `/analytics` — PnL, покупки/продажи/комиссии, круг состава, бары по бумагам.
 - `/agent` — мессенджер с аватаром.
-- `/pulse/:id`, `/learn/:id`.
+- `/pulse/:id`, `/learn/:id`, `/learn/league`.
 
 Назад — стрелка слева в красной шапке «АЛЬФА ИНВЕСТИЦИИ», не текстовая кнопка.
 
@@ -183,6 +183,12 @@ OLLAMA_URL=http://127.0.0.1:1 uvicorn main:app --host 127.0.0.1 --port 8000
 | POST | `/api/agent/chat` | `{ messages, context? }` — Ollama или fallback |
 | GET | `/api/pulse` | Посты |
 | GET | `/api/academy` | Уроки |
+| GET | `/api/referral` | Share-only код, путь `/onboarding?ref=`, счётчик. Заголовок `X-Demo-User` |
+| POST | `/api/referral/claim` | `{ code }` — атрибуция, без награды; свой код → 400 |
+| GET | `/api/league` | Лига практики: Аня + 3 сида, очки не из PnL |
+| POST | `/api/academy/progress` | `{ done, streak }` — синк уроков для лиги |
+
+Демо-юзер: uuid в `localStorage` (`alfa-demo-user`), заголовок `X-Demo-User`. Без заголовка API считает Аню.
 
 Портфель **в RAM процесса**: рестарт uvicorn обнуляет сделки. Стартовый кэш 10 000 ₽.
 
@@ -265,6 +271,7 @@ A/B: виджет vs путь «Инвестиции» — в этом репо 
 /catalog ── /instrument/:ticker ── /buy/:ticker[?side=sell]
 /pulse   ── /pulse/:id
 /learn   ── /learn/:id
+         └── /learn/league
 /profile ── /agent
 ```
 
@@ -276,7 +283,7 @@ A/B: виджет vs путь «Инвестиции» — в этом репо 
 | `/agent` | `/profile` |
 | `/operations`, `/analytics` | `/` |
 | `/pulse/:id` | `/pulse` |
-| `/learn/:id` | `/learn` |
+| `/learn/:id`, `/learn/league`, `/learn/compound` | `/learn` |
 | хабы с табами | стрелки нет |
 
 Таббар скрыт, если путь начинается с `/buy`, `/instrument`, `/agent`, `/operations`, `/analytics` или это деталь пульса/урока.
@@ -290,11 +297,13 @@ A/B: виджет vs путь «Инвестиции» — в этом репо 
 | Ключ | Где | Смысл |
 |------|-----|--------|
 | `alfa-onboarded` | localStorage | `'1'` после прохождения или пропуска онбординга |
-| `academy-done` | localStorage | JSON `{ [lessonId]: true }`; API всегда отдаёт `done: false` |
+| `academy-done` | localStorage | JSON `{ [lessonId]: true }`; на сервер синкается `POST /api/academy/progress` |
+| `academy-streak` | localStorage | `{ count, lastDone }` |
+| `alfa-demo-user` | localStorage | uuid сессии, уходит как `X-Demo-User` |
 
-Профиль не логинится: `GET /api/me` всегда Аня.
+Профиль не логинится: `GET /api/me` всегда Аня. Реферал и лига ключуются демо-id, не именем.
 
-Типы запросов фронта — `web/src/api.ts` (`api.me`, `portfolio`, `onboard`, `instruments`, `instrument`, `order`, `operations`, `chat`, `pulse`, `academy`, `health`).
+Типы запросов фронта — `web/src/api.ts` (`api.me`, `portfolio`, `onboard`, `instruments`, `instrument`, `order`, `operations`, `chat`, `pulse`, `academy`, `referral`, `claimReferral`, `league`, `academyProgress`, `health`).
 
 ---
 

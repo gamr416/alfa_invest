@@ -56,9 +56,42 @@ export type Instrument = {
   metrics?: Record<string, string | number>
 }
 
+const DEMO_USER_KEY = 'alfa-demo-user'
+
+export function demoUserId(): string {
+  let id = localStorage.getItem(DEMO_USER_KEY)
+  if (!id) {
+    id = crypto.randomUUID()
+    localStorage.setItem(DEMO_USER_KEY, id)
+  }
+  return id
+}
+
+export type Referral = {
+  code: string
+  path: string
+  invited_count: number
+}
+
+export type LeagueRow = {
+  name: string
+  you: boolean
+  points: number
+  hint: string
+}
+
+export type League = {
+  metric_label: string
+  rows: LeagueRow[]
+}
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const r = await fetch(path, {
-    headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Demo-User': demoUserId(),
+      ...(init?.headers || {}),
+    },
     ...init,
   })
   if (!r.ok) {
@@ -102,6 +135,18 @@ export const api = {
       body: JSON.stringify({ messages, context }),
     }),
   health: () => req<{ api: string; ollama: { available: boolean; model: string } }>('/api/health'),
+  referral: () => req<Referral>('/api/referral'),
+  claimReferral: (code: string) =>
+    req<{ ok: boolean; invited_count: number }>('/api/referral/claim', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    }),
+  league: () => req<League>('/api/league'),
+  academyProgress: (body: { done: string[]; streak: number }) =>
+    req<{ done: string[]; streak: number }>('/api/academy/progress', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
 }
 
 export function money(n: number, digits = 2) {
