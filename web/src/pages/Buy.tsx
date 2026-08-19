@@ -27,13 +27,14 @@ export function BuyPage() {
 
   if (!inst) return <div className="page muted">Загрузка…</div>
 
-  const n = Number(qty) || 0
-  const cost = n * inst.price
+  const n = Number(qty)
+  const qtyOk = Number.isFinite(n) && n > 0
+  const cost = (qtyOk ? n : 0) * inst.price
   const commission = Math.max(cost * 0.0005, 1)
   const needCash = cost + commission
   const blocked =
-    n <= 0
-      ? 'Укажи количество.'
+    !qtyOk
+      ? 'Укажи количество больше 0.'
       : side === 'buy' && needCash > cash
         ? 'Недостаточно средств.'
         : side === 'sell' && n > held
@@ -41,6 +42,7 @@ export function BuyPage() {
           : ''
 
   async function submit() {
+    if (!qtyOk) return
     setLoading(true)
     setErr('')
     try {
@@ -66,7 +68,18 @@ export function BuyPage() {
       </div>
       <div className="field">
         <label className="label">Количество</label>
-        <input className="input" value={qty} onChange={(e) => setQty(e.target.value)} inputMode="decimal" />
+        <input
+          className="input"
+          type="number"
+          min="0.01"
+          step="any"
+          inputMode="decimal"
+          value={qty}
+          onChange={(e) => {
+            const v = e.target.value
+            if (v === '' || /^\d*[.,]?\d*$/.test(v)) setQty(v.replace(',', '.'))
+          }}
+        />
       </div>
       <div className="card">
         <div className="row-between">
@@ -97,7 +110,8 @@ export function BuyPage() {
         ) : null}
       </div>
       {err ? <p style={{ color: 'var(--red)' }}>{err}</p> : null}
-      <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setConfirm(true)}>
+      {blocked ? <p style={{ color: 'var(--red)', marginTop: 12 }}>{blocked}</p> : null}
+      <button className="btn btn-primary" style={{ marginTop: 16 }} disabled={Boolean(blocked)} onClick={() => setConfirm(true)}>
         {side === 'sell' ? 'Продать' : 'Купить'}
       </button>
 

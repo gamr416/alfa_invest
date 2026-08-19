@@ -107,6 +107,7 @@ export function AgentPage() {
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
   const logRef = useRef<HTMLDivElement>(null)
+  const maxChars = 800
 
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: 'smooth' })
@@ -114,11 +115,13 @@ export function AgentPage() {
 
   async function send() {
     if (!text.trim() || loading) return
-    const next = [...msgs, { role: 'user' as const, content: text.trim() }]
+    const body = text.trim().slice(0, maxChars)
+    const next = [...msgs, { role: 'user' as const, content: body }]
     setMsgs(next)
     setText('')
     setLoading(true)
-    const res = await api.chat(next.map((m) => ({ role: m.role, content: m.content })))
+    const history = next.slice(-32).map((m) => ({ role: m.role, content: m.content }))
+    const res = await api.chat(history)
     setMsgs([...next, { role: 'assistant', content: res.reply }])
     setLoading(false)
   }
@@ -150,13 +153,21 @@ export function AgentPage() {
         ) : null}
       </div>
       <div className="chat-compose">
-        <input
-          className="input"
-          placeholder="Сообщение"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && send()}
-        />
+        <div className="chat-compose-field">
+          <input
+            className="input"
+            placeholder="Сообщение"
+            value={text}
+            maxLength={maxChars}
+            onChange={(e) => setText(e.target.value.slice(0, maxChars))}
+            onKeyDown={(e) => e.key === 'Enter' && send()}
+          />
+          {text.length >= 640 ? (
+            <span className="chat-limit muted">
+              {text.length}/{maxChars}
+            </span>
+          ) : null}
+        </div>
         <button className="btn btn-primary" onClick={send} disabled={loading} aria-label="Отправить">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path d="M3 11l18-8-8 18-2-7-8-3z" />

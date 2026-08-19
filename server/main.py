@@ -36,13 +36,13 @@ class OnboardIn(BaseModel):
 
 
 class ChatMessage(BaseModel):
-    role: str
-    content: str
+    role: str = Field(pattern="^(user|assistant)$")
+    content: str = Field(min_length=1, max_length=16_000)
 
 
 class ChatIn(BaseModel):
-    messages: list[ChatMessage]
-    context: str | None = None
+    messages: list[ChatMessage] = Field(min_length=1, max_length=128)
+    context: str | None = Field(default=None, max_length=4000)
 
 
 @app.get("/api/health")
