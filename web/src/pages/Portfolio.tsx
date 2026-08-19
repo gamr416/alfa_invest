@@ -37,61 +37,66 @@ export function PortfolioPage() {
   const pnlClass = data.day_pnl >= 0 ? 'pnl-up' : 'pnl-down'
 
   return (
-    <div className="page">
-      <p className="page-sub" style={{ marginBottom: 4 }}>
-        Брокерский счёт · бумага
-      </p>
-      <h1 className="page-title">Портфель</h1>
-      <div className="hero">
-        <p className="big-num">{money(data.total)}</p>
-        <p className={`muted ${pnlClass}`} style={{ marginTop: 6 }}>
-          за день {data.day_pnl >= 0 ? '+' : ''}
-          {money(data.day_pnl)} · {pct(data.day_pnl_pct)}
+    <div className="page page-dash">
+      <div className="dash-hero">
+        <p className="page-sub" style={{ marginBottom: 4 }}>
+          Брокерский счёт · бумага
         </p>
+        <h1 className="page-title">Портфель</h1>
+        <div className="hero">
+          <p className="big-num">{money(data.total)}</p>
+          <p className={`muted ${pnlClass}`} style={{ marginTop: 6 }}>
+            за день {data.day_pnl >= 0 ? '+' : ''}
+            {money(data.day_pnl)} · {pct(data.day_pnl_pct)}
+          </p>
+        </div>
+
+        <div className="stats-3">
+          <div className="stat-box">
+            <div className="k">Кэш</div>
+            <div className="v">{money(data.cash, 0)}</div>
+          </div>
+          <div className="stat-box">
+            <div className="k">В бумагах</div>
+            <div className="v">{money(invested, 0)}</div>
+          </div>
+          <div className="stat-box">
+            <div className="k">Позиций</div>
+            <div className="v">{data.positions.length}</div>
+          </div>
+        </div>
       </div>
 
-      <div className="stats-3">
-        <div className="stat-box">
-          <div className="k">Кэш</div>
-          <div className="v">{money(data.cash, 0)}</div>
-        </div>
-        <div className="stat-box">
-          <div className="k">В бумагах</div>
-          <div className="v">{money(invested, 0)}</div>
-        </div>
-        <div className="stat-box">
-          <div className="k">Позиций</div>
-          <div className="v">{data.positions.length}</div>
-        </div>
-      </div>
+      <aside className="dash-rail">
+        <Link className="banner" to="/catalog">
+          <img src="/mascot/alfa-hello.png" alt="" />
+          <div>
+            <strong>Первый шаг от 100 ₽</strong>
+            <span className="muted">Фонд денежного рынка LQDT. Без обещания доходности.</span>
+          </div>
+        </Link>
 
-      <Link className="banner" to="/catalog">
-        <img src="/mascot/alfa-hello.png" alt="" />
-        <div>
-          <strong>Первый шаг от 100 ₽</strong>
-          <span className="muted">Фонд денежного рынка LQDT. Без обещания доходности.</span>
+        <div className="tiles">
+          <Link className="tile" to="/analytics">
+            <span className="muted">Состав</span>
+            <strong>Аналитика</strong>
+          </Link>
+          <Link className="tile" to="/operations">
+            <span className="muted">Лента</span>
+            <strong>Операции</strong>
+          </Link>
+          <Link className="tile" to="/buy/LQDT">
+            <span className="muted">Консервативно</span>
+            <strong>Купить LQDT</strong>
+          </Link>
+          <Link className="tile" to="/agent">
+            <span className="muted">Спросить</span>
+            <strong>Агент</strong>
+          </Link>
         </div>
-      </Link>
+      </aside>
 
-      <div className="tiles">
-        <Link className="tile" to="/analytics">
-          <span className="muted">Состав</span>
-          <strong>Аналитика</strong>
-        </Link>
-        <Link className="tile" to="/operations">
-          <span className="muted">Лента</span>
-          <strong>Операции</strong>
-        </Link>
-        <Link className="tile" to="/buy/LQDT">
-          <span className="muted">Консервативно</span>
-          <strong>Купить LQDT</strong>
-        </Link>
-        <Link className="tile" to="/agent">
-          <span className="muted">Спросить</span>
-          <strong>Агент</strong>
-        </Link>
-      </div>
-
+      <div className="dash-assets">
       <div className="section-label">Активы</div>
       {data.positions.length === 0 ? (
         <EmptyState
@@ -124,7 +129,9 @@ export function PortfolioPage() {
           ))}
         </div>
       )}
+      </div>
 
+      <div className="dash-market">
       <div className="section-label">Движение рынка</div>
       <div className="h-scroll">
         {movers.map((m) => (
@@ -157,6 +164,7 @@ export function PortfolioPage() {
             <div className="muted">Пульс · без сигналов к покупке</div>
           </div>
         </Link>
+      </div>
       </div>
     </div>
   )

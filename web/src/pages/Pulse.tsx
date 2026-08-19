@@ -40,7 +40,8 @@ export function PulsePage() {
       ) : shown.length === 0 ? (
         <EmptyState text="В этой ленте пока тихо. Загляни позже или смени фильтр." />
       ) : (
-        shown.map((p) => (
+        <div className="feed-list">
+        {shown.map((p) => (
         <Link key={p.id} to={`/pulse/${p.id}`} state={p} className="feed-card">
           <div className="stripe" />
           <div className="body">
@@ -60,7 +61,8 @@ export function PulsePage() {
             <div style={{ fontSize: 14, color: 'var(--muted)' }}>{p.body}</div>
           </div>
         </Link>
-        ))
+        ))}
+        </div>
       )}
     </div>
   )
@@ -79,7 +81,7 @@ export function PulsePostPage() {
 
   if (!post) return <div className="page muted">Загрузка…</div>
   return (
-    <div className="page">
+    <div className="page page-prose">
       <h1 className="page-title" style={{ fontSize: 22 }}>
         {post.title}
       </h1>

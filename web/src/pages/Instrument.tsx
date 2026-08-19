@@ -36,29 +36,32 @@ export function InstrumentPage() {
   if (!inst) return <div className="page muted">Загрузка…</div>
 
   return (
-    <div className="page">
-      <div className="row-between">
-        <div>
-          <h1 className="page-title" style={{ fontSize: 24 }}>
-            {inst.ticker}
-          </h1>
-          <p className="page-sub" style={{ marginBottom: 8 }}>
-            {inst.name}
-          </p>
+    <div className="page page-instrument">
+      <div className="inst-head">
+        <div className="row-between">
+          <div>
+            <h1 className="page-title" style={{ fontSize: 24 }}>
+              {inst.ticker}
+            </h1>
+            <p className="page-sub" style={{ marginBottom: 8 }}>
+              {inst.name}
+            </p>
+          </div>
+          <div className="ticker-badge">{inst.type === 'etf' ? 'ETF' : 'Акц'}</div>
         </div>
-        <div className="ticker-badge">{inst.type === 'etf' ? 'ETF' : 'Акц'}</div>
+        <p className="big-num" style={{ fontSize: 32 }}>
+          {money(inst.price, inst.price < 1 ? 4 : 2)}
+        </p>
+        <p className={inst.change_pct >= 0 ? 'pnl-up muted' : 'pnl-down muted'}>{pct(inst.change_pct)} за день</p>
+        {news ? (
+          <Link to={`/pulse/${news.id}`} state={news} className="muted" style={{ display: 'block', marginTop: 8, fontSize: 13 }}>
+            {news.title}
+          </Link>
+        ) : null}
+        <p className="inst-desc">{inst.desc}</p>
       </div>
-      <p className="big-num" style={{ fontSize: 32 }}>
-        {money(inst.price, inst.price < 1 ? 4 : 2)}
-      </p>
-      <p className={inst.change_pct >= 0 ? 'pnl-up muted' : 'pnl-down muted'}>{pct(inst.change_pct)} за день</p>
-      {news ? (
-        <Link to={`/pulse/${news.id}`} state={news} className="muted" style={{ display: 'block', marginTop: 8, fontSize: 13 }}>
-          {news.title}
-        </Link>
-      ) : null}
-      <p style={{ margin: '12px 0', fontSize: 14 }}>{inst.desc}</p>
 
+      <div className="inst-chart">
       <div className="seg">
         <button className={tab === 'chart' ? 'active' : ''} onClick={() => setTab('chart')}>
           График
@@ -149,15 +152,18 @@ export function InstrumentPage() {
           ))}
         </div>
       )}
-
-      <div className="action-pair" style={{ marginTop: 16 }}>
-        <Link className="btn btn-primary" to={`/buy/${inst.ticker}`}>
-          Купить
-        </Link>
-        <Link className="btn btn-ghost" to={`/buy/${inst.ticker}?side=sell`}>
-          Продать
-        </Link>
       </div>
+
+      <aside className="inst-side">
+        <div className="action-pair">
+          <Link className="btn btn-primary" to={`/buy/${inst.ticker}`}>
+            Купить
+          </Link>
+          <Link className="btn btn-ghost" to={`/buy/${inst.ticker}?side=sell`}>
+            Продать
+          </Link>
+        </div>
+      </aside>
     </div>
   )
 }

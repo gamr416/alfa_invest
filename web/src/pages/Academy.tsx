@@ -99,7 +99,7 @@ export function LessonPage() {
   const done = readDone()
   const node = LOCAL_ACADEMY.nodes.find((n) => n.id === id) || null
   const glossary = LOCAL_ACADEMY.glossary
-  const frame = document.getElementById('phone-frame')
+  const frame = document.getElementById('app-shell')
 
   if (!node) return <div className="page muted">Нет такого урока</div>
   if (node.locked || !isUnlocked(node, done)) return <Navigate to="/learn" replace />
@@ -109,7 +109,7 @@ export function LessonPage() {
   const paras = node.text.split(/\n\n/)
 
   return (
-    <div className="page">
+    <div className="page page-prose">
       <p className="muted">{node.minutes} мин</p>
       <h1 className="page-title" style={{ fontSize: 22 }}>
         {node.title}

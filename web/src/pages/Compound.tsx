@@ -43,7 +43,8 @@ export function CompoundPage() {
   if (blocked) return <Navigate to="/learn" replace />
 
   return (
-    <div className="page">
+    <div className="page page-split">
+      <div className="split-main">
       <h1 className="page-title">Сложный процент</h1>
       <p className="page-sub">это если ставка не меняется — не прогноз</p>
       <Mascot
@@ -75,6 +76,8 @@ export function CompoundPage() {
           </button>
         ))}
       </div>
+      </div>
+      <aside className="split-side">
       <div className="card" style={{ marginTop: 16 }}>
         <div className="row-between">
           <span className="muted">В модели через {years} {years === 1 ? 'год' : years < 5 ? 'года' : 'лет'}</span>
@@ -107,6 +110,7 @@ export function CompoundPage() {
       <Link className="btn btn-ghost" style={{ marginTop: 8 }} to="/instrument/LQDT">
         К спокойному фонду
       </Link>
+      </aside>
     </div>
   )
 }

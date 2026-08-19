@@ -154,7 +154,7 @@ export function AnalyticsPage() {
           </div>
 
           <div className="section-label">Состав</div>
-          <div className="card">
+          <div className="card mix-row">
             <div className="pie" style={{ background: `conic-gradient(${gradient || '#EAEAEA'})` }} />
             <div className="legend">
               {parts.map((x) => (

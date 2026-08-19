@@ -38,6 +38,7 @@ export function CatalogPage() {
           <span className="muted">LQDT, SBGB, FXRU — консервативные фонды.</span>
         </div>
       </Link>
+      <div className="catalog-tools">
       <input
         className="input"
         placeholder="Тикер или название"
@@ -58,6 +59,7 @@ export function CatalogPage() {
             {c.title}
           </button>
         ))}
+      </div>
       </div>
       {!ready ? (
         <p className="muted">Загрузка…</p>

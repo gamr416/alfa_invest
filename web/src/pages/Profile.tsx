@@ -17,7 +17,8 @@ export function ProfilePage() {
   if (!me) return <div className="page muted">Загрузка…</div>
 
   return (
-    <div className="page">
+    <div className="page page-profile">
+      <div className="profile-main">
       <h1 className="page-title">{me.name}</h1>
       <p className="page-sub">{me.age} лет · когорта 18–26</p>
       <div className="section-label">Счёт и карта</div>
@@ -50,7 +51,9 @@ export function ProfilePage() {
           <strong>Аналитика</strong>
         </Link>
       </div>
+      </div>
 
+      <aside className="profile-side">
       <div className="section-label">Ассистент</div>
       <div className="card">
         <div className="row-between">
@@ -89,6 +92,7 @@ export function ProfilePage() {
           </div>
         </div>
       </div>
+      </aside>
     </div>
   )
 }

@@ -14,19 +14,17 @@ function parentOf(path: string): string | null {
 }
 
 export function PhoneShell({ children, tabs = true }: { children: ReactNode; tabs?: boolean }) {
-  const now = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
   const loc = useLocation()
   const nav = useNavigate()
   const backTo = parentOf(loc.pathname)
   const isChat = loc.pathname === '/agent'
 
   return (
-    <div className="app-stage">
-        <div className="phone" id="phone-frame">
-        <div className="phone-status">
-          <span>{now}</span>
-          <span>демо</span>
-        </div>
+    <div className={`app-stage${isChat ? ' chat-mode' : ''}`}>
+      <a className="skip-link" href="#main">
+        К содержимому
+      </a>
+      <div className={`app-shell${tabs ? '' : ' no-mobile-tabs'}`} id="app-shell">
         <header className="brand-bar">
           {backTo ? (
             <button className="brand-back" type="button" aria-label="Назад" onClick={() => nav(backTo)}>
@@ -35,11 +33,14 @@ export function PhoneShell({ children, tabs = true }: { children: ReactNode; tab
               </svg>
             </button>
           ) : null}
-          <span className="brand-title">АЛЬФА ИНВЕСТИЦИИ</span>
+          <span className="brand-title">Альфа инвестиции</span>
+          <span className="brand-badge">демо</span>
           <NewsBell />
         </header>
-        <div className={`phone-body${tabs ? '' : ' no-tabs'}${isChat ? ' chat-mode' : ''}`}>{children}</div>
-        {tabs ? <TabBar /> : null}
+        <TabBar />
+        <main id="main" className="app-body">
+          {children}
+        </main>
       </div>
     </div>
   )

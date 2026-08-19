@@ -54,7 +54,7 @@ export function BuyPage() {
   }
 
   return (
-    <div className="page">
+    <div className="page page-narrow">
       <Mascot pose="type" size={100} text={`Заявка по ${inst.ticker}. Проверь сумму перед отправкой.`} />
       <div className="seg two">
         <button className={side === 'buy' ? 'active' : ''} onClick={() => setSide('buy')}>

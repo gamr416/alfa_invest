@@ -85,7 +85,7 @@ export function Onboarding() {
 
   return (
     <PhoneShell tabs={false}>
-      <div className="page">
+      <div className="page page-narrow">
         <div className="steps">
           {[0, 1, 2, 3, 4].map((i) => (
             <i key={i} className={i <= step ? 'on' : ''} />

@@ -48,11 +48,16 @@ function ShellRoutes() {
 function AgeBlocked() {
   return (
     <div className="app-stage">
-      <div className="phone-shell">
-        <div className="page">
-          <h1 className="page-title">Пока нельзя</h1>
-          <p className="page-sub">Демо для 18+. Младше 18 сюда не пускаем.</p>
-        </div>
+      <div className="app-shell no-mobile-tabs">
+        <header className="brand-bar">
+          <span className="brand-title">Альфа инвестиции</span>
+        </header>
+        <main className="app-body">
+          <div className="page page-narrow">
+            <h1 className="page-title">Пока нельзя</h1>
+            <p className="page-sub">Демо для 18+. Младше 18 сюда не пускаем.</p>
+          </div>
+        </main>
       </div>
     </div>
   )
@@ -81,8 +86,8 @@ function Gate() {
 
   if (!ready) {
     return (
-      <div className="app-stage">
-        <div className="muted">Загрузка…</div>
+      <div className="app-stage boot">
+        <p className="muted">Загрузка…</p>
       </div>
     )
   }
