@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+import time
 from pathlib import Path
 from typing import Annotated
 
@@ -15,6 +17,12 @@ from ollama_client import chat as ollama_chat
 from ollama_client import health as ollama_health
 from stubs import alfa, league, market, portfolio, referral
 from stubs.identity import resolve as resolve_user
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+)
+log = logging.getLogger("alfa.api")
 
 app = FastAPI(title="Alfa Invest MVP")
 app.add_middleware(
@@ -131,7 +139,18 @@ async def agent_chat(body: ChatIn):
             },
             *msgs,
         ]
-    return await ollama_chat(msgs, client=alfa.get_me())
+    t0 = time.perf_counter()
+    result = await ollama_chat(msgs, client=alfa.get_me())
+    ms = (time.perf_counter() - t0) * 1000
+    log.info(
+        "agent/chat ok=%s fallback=%s filtered=%s %.0fms reply_len=%s",
+        result.get("ok"),
+        result.get("fallback"),
+        result.get("filtered"),
+        ms,
+        len(result.get("reply") or ""),
+    )
+    return result
 
 
 PULSE_STATIC = [

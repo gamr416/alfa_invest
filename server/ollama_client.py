@@ -2,21 +2,52 @@
 
 from __future__ import annotations
 
+import logging
 import os
+import time
+from pathlib import Path
 from typing import Any
 
 import httpx
 
 from profanity import SAFE_REPLY, TOPIC_REDIRECT, filter_reply, is_greeting, is_invest_topic, is_jailbreak_request
 
+log = logging.getLogger("alfa.ollama")
+
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434")
 MODEL = os.getenv("OLLAMA_MODEL", "bonsai-27b:latest")
+READ_TIMEOUT = float(os.getenv("OLLAMA_READ_TIMEOUT", "240"))
 
 NUM_CTX = 2048
 NUM_PREDICT = 420
 # User bubble cap; Qwen/Bonsai ~2 chars/token on Russian.
 MAX_MSG_CHARS = 800
 _TEMPLATE_TOKENS = 12
+
+_file_log_ready = False
+
+
+def _ensure_file_log() -> None:
+    """Optional file sink: OLLAMA_REQUEST_LOG=/path/to.log"""
+    global _file_log_ready
+    if _file_log_ready:
+        return
+    _file_log_ready = True
+    path = (os.getenv("OLLAMA_REQUEST_LOG") or "").strip()
+    if not path:
+        return
+    try:
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        fh = logging.FileHandler(path, encoding="utf-8")
+        fh.setLevel(logging.INFO)
+        fh.setFormatter(
+            logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s")
+        )
+        log.addHandler(fh)
+        log.setLevel(logging.INFO)
+        log.info("request log file=%s", path)
+    except OSError as e:
+        log.warning("cannot open OLLAMA_REQUEST_LOG %s: %s", path, e)
 
 SYSTEM = """Ты — помощник Альфа-инвестиций для экономически активных 18–26: студенты, выпускники, джуны.
 Клиент уже знает, что такое акции, облигации, вклад, инфляция и риск потери денег. Не читай лекцию «что такое акция».
@@ -30,7 +61,7 @@ SYSTEM = """Ты — помощник Альфа-инвестиций для э�
 Не имитируй тест Банка России и не говори, что клиент «прошёл квалификацию» или официальный тест неквала.
 Не советуй акции, крипту и маржу сверх выбранного продукта.
 Если спрашивают «что купить» — фонд денежного рынка или облигационный фонд как первый шаг, не как «лучший актив».
-Говори только про инвестиции, накопления и экономику в рамках этого приложения. Другие темы не обсуждай: не отвечай по сути и сразу верни разговор к первому взносу, риску или фонду денежного рынка.
+Отвечай по сути на вопросы про инвестиции, накопления, экономику и базовые термины: деньги, риск, БПИФ/ETF, фонды, облигации, акции, вклад, инфляция, брокер, портфель. Короткие «что такое …» по этим темам — нормальный ответ в 1–3 предложениях; потом можно мягко связать с первым взносом или LQDT. Не отшивай такие вопросы шаблоном «это не про инвестиции». Уводи разговор только если тема явно не про деньги и инвестиции (рецепты, спорт, мемы, политика без экономики).
 Без юридических дисклеймеров в ответе. Обращайся по имени. Соблюдай род: ж — готова/поняла; м — готов/понял.
 """
 
@@ -113,10 +144,13 @@ async def chat(
     temperature: float = 0.3,
     client: dict | None = None,
 ) -> dict[str, Any]:
+    _ensure_file_log()
     last_user = next((m.get("content") or "" for m in reversed(messages) if m.get("role") == "user"), "")
     if is_jailbreak_request(last_user):
+        log.info("chat filtered reason=jailbreak last=%r", (last_user or "")[:80])
         return {"ok": True, "reply": SAFE_REPLY, "model": MODEL, "filtered": True}
     if last_user and not is_greeting(last_user) and not is_invest_topic(last_user):
+        log.info("chat filtered reason=offtopic last=%r", (last_user or "")[:80])
         return {"ok": True, "reply": TOPIC_REDIRECT, "model": MODEL, "filtered": True}
 
     system = SYSTEM + _client_block(client)
@@ -133,8 +167,19 @@ async def chat(
             "num_ctx": NUM_CTX,
         },
     }
+    t0 = time.perf_counter()
+    log.info(
+        "chat start model=%s url=%s timeout=%.0fs msgs=%s last=%r",
+        MODEL,
+        OLLAMA_URL,
+        READ_TIMEOUT,
+        len(history),
+        (last_user or "")[:80],
+    )
     try:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(2.0, read=240.0)) as http:
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(connect=2.0, read=READ_TIMEOUT, write=5.0, pool=2.0)
+        ) as http:
             r = await http.post(f"{OLLAMA_URL}/api/chat", json=payload)
             r.raise_for_status()
             data = r.json()
@@ -143,22 +188,24 @@ async def chat(
             if not text and msg.get("thinking"):
                 parts = [p.strip() for p in str(msg["thinking"]).split("\n") if p.strip()]
                 text = parts[-1] if parts else ""
-            return {"ok": True, "reply": filter_reply(text, require_topic=True), "model": MODEL}
+            reply = filter_reply(text, require_topic=True)
+            ms = (time.perf_counter() - t0) * 1000
+            log.info(
+                "chat ok %.0fms len=%s reply=%r",
+                ms,
+                len(reply),
+                (reply or "")[:120],
+            )
+            return {"ok": True, "reply": reply, "model": MODEL}
     except Exception as e:
+        ms = (time.perf_counter() - t0) * 1000
+        log.warning("chat fallback %.0fms err=%s: %s", ms, type(e).__name__, e)
         name = (client or {}).get("name") or "друг"
-        gender = (client or {}).get("gender")
-        if gender in ("female", "ж", "f"):
-            reply = (
-                f"{name}, я сейчас без нейросети — сервер ассистента не отвечает. "
-                "Можешь без меня: учёба в приложении и первый шаг в фонд денежного рынка LQDT от 100 ₽. "
-                "Когда модель снова включится, я продолжу объяснять уже выбранный продукт."
-            )
-        else:
-            reply = (
-                f"{name}, я сейчас без нейросети — сервер ассистента не отвечает. "
-                "Можешь без меня: учёба в приложении и первый шаг в фонд денежного рынка LQDT от 100 ₽. "
-                "Когда модель снова включится, я продолжу объяснять уже выбранный продукт."
-            )
+        reply = (
+            f"{name}, я сейчас без нейросети — сервер ассистента не отвечает. "
+            "Можешь без меня: учёба в приложении и первый шаг в фонд денежного рынка LQDT от 100 ₽. "
+            "Когда модель снова включится, я продолжу объяснять уже выбранный продукт."
+        )
         return {
             "ok": False,
             "reply": reply,

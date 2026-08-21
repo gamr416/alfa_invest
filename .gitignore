@@ -7,4 +7,6 @@ __pycache__/
 .env
 cursor-agent-skills-20260527.zip
 .cursor/
+serv
+logs/
 

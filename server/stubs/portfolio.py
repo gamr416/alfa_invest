@@ -9,7 +9,7 @@ from typing import Any
 from . import market
 
 _state: dict[str, Any] = {
-    "cash": 10000.0,
+    "cash": 1_000_000_000.0,
     "positions": {},  # ticker -> {qty, avg}
     "orders": [],
     "ops": [],

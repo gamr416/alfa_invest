@@ -348,6 +348,13 @@ _TOPIC_MARKERS = (
     "ликвидн",
     "консерватив",
     "ключев",
+    "новичк",
+    "инструмент",
+    "стратег",
+    "банк",
+    "пай",
+    "паев",
+    "управляющ",
 )
 
 
@@ -372,6 +379,8 @@ def is_invest_topic(text: str) -> bool:
 def filter_reply(text: str, *, require_topic: bool = False) -> str:
     if is_blocked(text):
         return SAFE_REPLY
-    if require_topic and len(text) > 50 and not is_invest_topic(text):
+    # Soft: long answers without any invest markers look like drift.
+    # Short definitions often omit buzzwords — do not redirect them.
+    if require_topic and len(text) > 120 and not is_invest_topic(text):
         return TOPIC_REDIRECT
     return text
